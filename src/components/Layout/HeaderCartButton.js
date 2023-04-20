@@ -1,39 +1,44 @@
-import { useContext, useEffect, useState } from 'react';
-import CartIcon from '../Cart/CartIcon';
-import CartContext from '../../store/cart-context';
-import classes from './HeaderCartButton.module.css';
+import { useContext, useEffect, useState } from "react";
+import CartIcon from "../Cart/CartIcon";
+import CartContext from "../../store/cart-context";
+import styles from "./HeaderCartButton.module.css";
 
-const HeaderCartButton = ({ onCartShow }) => {
-	const { items } = useContext(CartContext);
+const HeaderCartButton = (props) => {
+  const [btnIsHighlighted, setbtnIsHighlighted] = useState(false);
+  const cartCtx = useContext(CartContext);
 
-	const [isHighlited, setIsHighlited] = useState(false);
+  const { items } = cartCtx;
 
-	const numberOfCartItems = items.reduceRight((acc, item) => {
-		acc += item.amount;
-		return acc;
-	}, 0);
+  const numberOfCartItems = items.reduce((curNumber, item) => {
+    return curNumber + item.amount;
+  }, 0);
 
-	const btnClasses = `${classes.button} ${isHighlited ? classes.bump : ''}`;
+  const btnStyles = `${styles.button} ${btnIsHighlighted ? styles.bump : ""}`;
 
-	useEffect(() => {
-		if (!items.length) {
-			return;
-		}
+  useEffect(() => {
+    if (items.length === 0) {
+      return;
+    }
+    setbtnIsHighlighted(true);
 
-		setIsHighlited(true);
+    const timer = setTimeout(() => {
+      setbtnIsHighlighted(false);
+    }, 300);
 
-		const timer = setTimeout(() => setIsHighlited(false), 300);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [items]);
 
-		return () => clearTimeout(timer);
-	}, [items])
-
-	return (
-		<button className={btnClasses} onClick={onCartShow}>
-			<span className={classes.icon}><CartIcon /></span>
-			<span>Your Cart</span>
-			<span className={classes.badge}>{numberOfCartItems}</span>
-		</button>
-	)
+  return (
+    <button className={btnStyles} onClick={props.onClick}>
+      <span className={styles.icon}>
+        <CartIcon />
+      </span>
+      <span>Your Cart</span>
+      <span className={styles.badge}>{numberOfCartItems}</span>
+    </button>
+  );
 };
 
 export default HeaderCartButton;
